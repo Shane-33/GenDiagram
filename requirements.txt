@@ -1,0 +1,7 @@
+streamlit==<version>
+numpy==<version>
+matplotlib==3.4.3
+networkx==2.7.3
+graphviz==0.17
+bokeh==<version>
+altair==<version>
