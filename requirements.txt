@@ -1,5 +1,5 @@
 streamlit==0.89.0
-numpy==1.21.0
+numpy==1.23.5
 matplotlib==3.4.3
 networkx==2.6.3
 graphviz==0.17
