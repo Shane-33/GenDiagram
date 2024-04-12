@@ -6,4 +6,6 @@ graphviz==0.17
 bokeh==2.4.0
 altair==4.1.0
 click==7.1.2
+IPython
+
 
