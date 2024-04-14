@@ -6,6 +6,7 @@ from graphviz import Source
 from bokeh.plotting import figure, show
 from bokeh.io import output_notebook
 import altair as alt
+from gpt4_integration import generate_diagram_code  # Import the function from your module
 
 
 # Setup for Bokeh
@@ -41,15 +42,57 @@ example_codes = {
         "Line Chart": "alt.Chart(alt.Data(values=[{'x': 1, 'y': 5}, {'x': 2, 'y': 3}, {'x': 3, 'y': 6}, {'x': 4, 'y': 7}])).mark_line().encode(x='x:Q', y='y:Q')"
     }
 }
-st.title("Diagram and Plot Creator")
-st.header("Select the type and enter the definition or expression:")
 
-# Diagram type selection
-diagram_type = st.selectbox("Type", ["Mermaid", "DOT", "Matplotlib", "NetworkX", "Bokeh", "Altair"])
+# Main title and header
+# UI layout and style
+st.set_page_config(layout="wide", page_title="AI Diagram and Plot Creator", page_icon="📊")
+# Custom CSS for branding and aesthetics
+st.markdown("""
+<style>
+body { 
+    color: #fff;
+    background-color: #0e1117;
+}
+.css-2trqyj {
+    background-color: #161b22;
+}
+.css-18e3th9 {
+    padding: 0.25rem 1rem;
+}
+.css-1d391kg {
+    background-color: #20232a;
+}
+button {
+    border-radius: 20px;
+    border: 1px solid #1f6feb;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# Sidebar content and documentation links
+
+
+st.title("AI Diagram and Plot Creator")
+st.subheader("Create various diagrams and plots effortlessly using multiple libraries.")
+
+# Sidebar for documentation and about
 st.sidebar.title("About")
-st.sidebar.text("This app allows creating diagrams and plots using various libraries and tools.")
+st.sidebar.info("This app allows you to create diagrams and plots using various libraries and tools. Select the type of diagram or plot from the dropdown menu, provide the necessary code, and generate visualizations.")
+
+# Function to handle GPT-4 diagram generation
+def gpt4_diagram_interface():
+    prompt = st.text_area("Enter your prompt for GPT-4:", height=150)
+    if st.button("Generate Diagram Code"):
+        try:
+            generated_code = generate_diagram_code(prompt)
+            st.text_area("Generated Code:", height=300, value=generated_code)
+        except Exception as e:
+            st.error(f"Failed to generate code. Error: {str(e)}")
+
+# GPT-4 interface in sidebar
+st.sidebar.header("GPT-4 Diagram Generation")
+gpt4_diagram_interface()
+st.sidebar.markdown("---")
+
 
 documentation_links = {
     "Mermaid": "[Mermaid Documentation](https://mermaid-js.github.io/mermaid/#/)",
@@ -60,12 +103,25 @@ documentation_links = {
     "Altair": "[Altair Documentation](https://altair-viz.github.io/)"
 }
 
+
+
+# Diagram type selection
+diagram_type = st.selectbox("Type", ["Mermaid", "DOT", "Matplotlib", "NetworkX", "Bokeh", "Altair"])
+
+
 if diagram_type in documentation_links:
     st.sidebar.markdown(documentation_links[diagram_type])
 
-# Handle each diagram type
+# Handle Mermaid diagrams
 if diagram_type == "Mermaid":
     mermaid_code = st.text_area("Mermaid code", height=200, value=example_codes["Mermaid"]["Flowchart"])
+    
+    # Calculate the number of lines in the Mermaid code
+    num_lines = mermaid_code.count('\n') + 1  # Counting the number of new lines and adding one for the last line
+    
+    # Set the height dynamically based on the number of lines
+    height = 120 * num_lines  # Adjust this multiplier as needed to fit your content
+    
     if mermaid_code:
         # Embed Mermaid diagram directly using components.html
         st.components.v1.html(f"""
@@ -76,7 +132,10 @@ if diagram_type == "Mermaid":
         <script>
         mermaid.initialize({{startOnLoad:true}});
         </script>
-        """, height=300)
+        """, height=height)
+
+
+
 elif diagram_type == "DOT":
     dot_code = st.text_area("DOT code", height=200, value=example_codes["DOT"]["Directed Graph"])
     if dot_code:
@@ -85,10 +144,11 @@ elif diagram_type == "DOT":
             st.graphviz_chart(dot_code)
         except Exception as e:
             st.error(f"Error: {e}")
+
 elif diagram_type == "Matplotlib":
     function_input = st.selectbox("Function", options=list(example_codes["Matplotlib"].values()))
+    x = np.linspace(-10, 10, 400)
     try:
-        x = np.linspace(-10, 10, 400)
         y = eval(function_input)
         fig, ax = plt.subplots()
         ax.plot(x, y)
@@ -97,7 +157,9 @@ elif diagram_type == "Matplotlib":
         ax.grid(True)
         st.pyplot(fig)
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"Failed to generate the plot. Error: {str(e)}")
+        st.info("Please ensure the function is defined correctly. For example, use 'np.sin(x)' for a sine wave.")
+
 
 elif diagram_type == "NetworkX":
     nx_code = st.text_area("NetworkX code", height=200, value=next(iter(example_codes["NetworkX"].values())))
@@ -140,7 +202,7 @@ for example_type, examples in example_codes.items():
             st.sidebar.write(f"**{title}**")
             st.sidebar.code(code)
 
-
-
-
-
+# Implementing tooltips and modal for help
+with st.sidebar:
+    if st.button("Help"):
+        st.markdown("Here's how to use the application effectively...")
