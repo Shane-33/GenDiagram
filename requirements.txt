@@ -1,0 +1,11 @@
+streamlit>=1.0
+numpy==1.23.5
+matplotlib==3.4.3
+networkx==2.6.3
+graphviz==0.17
+bokeh==2.4.0
+altair==4.1.0
+click==7.1.2
+IPython
+openai==0.28.0  # Replace '0.28.0' with the desired version
+
